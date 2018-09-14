@@ -42,6 +42,64 @@ class sgfixup {
 	
 	}
 	
+	/**
+	 * Apply fixups to the content
+	 * 
+	 */
+	//$fixups = array( $this
+	
+	function apply_fixups( $ID, $post ) {
+		echo "Applying fixups for $ID"; 
+		$content = $post->post_content;
+		$content = $this->fixup_box_shortcode( $content );
+		$content = $this->fixup_dashes( $content );
+		$this->update_post( $post, $content );
+		echo PHP_EOL;
+  }
+	
+	function fixup_box_shortcode( $content ) {
+		if ( false !== strpos( $content, "[box" ) ) {
+			echo PHP_EOL;
+			echo $content;
+			//$content = str_replace( "[box sty
+			$content = str_replace( '[box style="rounded"]', '', $content );
+			$content = str_replace( '[/box]', '', $content );
+			echo $content;
+		 
+		}	else { 
+			echo " No box";
+		}
+		return $content;
+	}
+	
+	/**
+	 * Fixup dashes.
+	 * 
+	 * Some hyphens get converted to mdash or ndash which can go wrong with UTF-8 imported as latin.
+	 * The right way of dealing with the issue is to export and import with the correctly defined character set.
+	 * using the `--default-character-set=utf8` parameter on the mysql import
+	 * 
+	 * This will prevent characters which have been exported as UTF-8 from being doubly converted. 
+	 * Lord knows why MySQL dump files contain stuff like this.
+	 * `/ *!40101 SET NAMES utf8 * /;`  - note spaces added between *'s and /'s for PHP benefit
+	 * 
+	 * So - becomes – which becomes â€“
+	 */
+	
+	function fixup_dashes( $content ) {
+		$content = str_replace( " – ", " - ", $content );
+		$content = str_replace( "â€“", "-", $content );
+		return $content;
+  }
+	
+	function update_post( $post, $content ) {
+		if ( $content != $post->post_content ) {
+			$post->post_content = $content;
+			wp_update_post( $post );
+			echo "Updated {$post->ID}" ;
+		}
+	}
+	
 /*	
 	
 	
