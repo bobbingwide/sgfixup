@@ -51,12 +51,31 @@ class sgfixup {
 	function apply_fixups( $ID, $post ) {
 		echo "Applying fixups for $ID"; 
 		$content = $post->post_content;
-		$content = $this->fixup_box_shortcode( $content );
-		$content = $this->fixup_dashes( $content );
+		//$content = $this->fixup_box_shortcode( $content );
+		//$content = $this->fixup_dashes( $content );
+		//$content = $this->fixup_p_styles( $content );
+		$content = $this->fixup_span_styles( $content );
 		$this->update_post( $post, $content );
 		echo PHP_EOL;
   }
 	
+	/**
+	 * Updates the post, if the content has changed
+	 * 
+	 * @param object $post The post object
+	 * @param string $content the updated post_content
+   */
+	function update_post( $post, $content ) {
+		if ( $content != $post->post_content ) {
+			$post->post_content = $content;
+			wp_update_post( $post );
+			echo "Updated {$post->ID}" ;
+		}
+	}
+	
+	/**
+	 * Eliminate the box shortcode from the content
+	 */
 	function fixup_box_shortcode( $content ) {
 		if ( false !== strpos( $content, "[box" ) ) {
 			echo PHP_EOL;
@@ -75,7 +94,7 @@ class sgfixup {
 	/**
 	 * Fixup dashes.
 	 * 
-	 * Some hyphens get converted to mdash or ndash which can go wrong with UTF-8 imported as latin.
+	 * Some hyphens get converted to en-dash which can go wrong with UTF-8 imported as latin.
 	 * The right way of dealing with the issue is to export and import with the correctly defined character set.
 	 * using the `--default-character-set=utf8` parameter on the mysql import
 	 * 
@@ -84,6 +103,42 @@ class sgfixup {
 	 * `/ *!40101 SET NAMES utf8 * /;`  - note spaces added between *'s and /'s for PHP benefit
 	 * 
 	 * So - becomes – which becomes â€“
+	 
+	 
+	 
+ * Character fixing
+
+Non b
+
+https://www.fileformat.info/info/unicode/char/00a0/charset_support.htm
+
+https://www.ascii-code.com/
+
+Started as             | Unicode | Export UTF-8 | After import displayed as | Which is
+-------------          | ------- | ------------ | ------------------------- | ------------ 
+No-break space         | U+00A0  | c2a0         |	¶                         | Latin capital letter A with circumflex, Non-breaking space
+En dash                | U+2013  | e28093       | â € ™                     | Latin small letter a with circumflex, Euro symbol, Left double quotation mark
+Left single quotation  | U+								      | â € ˜											| 
+Right single quotation |  
+Left double quotation  | U+201C  | e2809c       | â € œ                     |  ", ", Latin small ligature oe
+    
+
+
+
+Originally | Which is | Converted to | Which is  | 	Like
+---        | -----    |  ----------------  | --------- | -------           
+ -         | Em dash  |   
+				 Â   	 | Lower case a acute | C3 A1
+
+160 A0 <span style="color: #ff0000;"><strong> </strong></span>
+
+ 
+
+ 
+
+
+Hex 92  
+’ right single quotation â€™   â€
 	 */
 	
 	function fixup_dashes( $content ) {
@@ -92,13 +147,80 @@ class sgfixup {
 		return $content;
   }
 	
-	function update_post( $post, $content ) {
-		if ( $content != $post->post_content ) {
-			$post->post_content = $content;
-			wp_update_post( $post );
-			echo "Updated {$post->ID}" ;
+	
+	/** 
+	 * Removes unwanted classes and styles from p tags
+	 *
+	 * `<p class="western" style="margin-bottom: 5.95pt">Hello World!</p>`
+	 * becomes
+	 * `<p>Hello World!</p>`
+	 * 
+	 * `
+	 * <p style="padding-left: 30px">Hello World</p>
+	 * `
+	 * 
+	 * The result of the find is an array of elements
+	 * `
+	 *	Array  (
+	 *		[0] => simple_html_dom_node Object
+   *     (
+   *         [nodetype] => 1
+   *         [tag] => p
+   *         [attr] => Array
+   *             (
+   *                 [class] => western
+                    [style] => margin-bottom: 5.95pt
+                )
+
+            [children] => Array
+	 *	`
+	 * 
+	 * @param string $content
+	 * @return string content with class and style attributes removed from each p tag
+   */
+	function fixup_p_styles( $content ) {
+	
+		//echo $content;
+		//echo PHP_EOL;
+		$html = str_get_html( $content );
+		
+		foreach ( $html->find('p[class]') as $e) {
+			$e->removeAttribute( "class" );
 		}
+		
+		foreach ( $html->find('p[style]') as $e) {
+			$e->removeAttribute( "style" );
+		}
+		
+		$str = $html->save();
+		//echo $str;
+		//echo PHP_EOL;
+		return $str;
 	}
+	
+	/**
+	 * Fixes up unnecessary span tags in content
+	 * 
+	 * Question: Do we still want stuff highlighted red?
+	 * 
+	 *
+	 * <span style="color: #ff0000">Hello World!</span>
+	 */
+	
+	function fixup_span_styles( $content ) {
+	
+		$html = str_get_html( $content );
+		
+		foreach ($html->find('span[style]') as $e) {
+			echo $e->getAttribute( "style" );
+		}
+		
+		
+		
+		return $content;
+	}
+	
+	
 	
 /*	
 	

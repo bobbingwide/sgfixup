@@ -4,7 +4,7 @@
  * @copyright (C) Copyright Bobbing Wide 2018
  * @package sgfixup
  * 
- * oik batch routine to fix up the HTML in Ascentor's posts
+ * oik batch routine to fix up the HTML in SG Motorsport's posts and categories
  *
  * Syntax: 
  * `
@@ -12,43 +12,39 @@
  * oikwp sgfixup.php 
  * `
  *
- * Processing
- 
- 
-
-53 broken images
-111 shortcodes  - [box] can be removed.
-xxx Allow reviews
-
-3 Customer services wrong
-49 ¶ converted to Â 
-
-160 A0 <span style="color: #ff0000;"><strong> </strong></span>
-
- 
-
- 
-
-left backtick â€˜
-right backtick â€™
-
-youtube links 
-h1
-h2
-
-
+ * Processing:
  * 
+ * Number | Problem | Solutions
+ * ------ | ------- | -------------
+ * 53     | broken images
+ * 11     | shortcodes  - [box] can be removed 
+ * xxx    | Allow reviews
+ * 3      | Customer services wrong - en dash character problem 
+ * xxx    | Character fixing - for characters pasted from Word and elsewhere
+ *        | youtube links
+ *        | h1's in products
+ *        | h2's in products
+ *        | links with target="_blank" rel="noopener"
+ *        | telephone number, email and address hard coded
+ *        | Style in tags: p, span 
+ 
  * 
  * - Uses simple_html_dom to parse the post_content for each post
  * - Depends on oik, since it runs under oikwp
  * 
- * post_types	| count
- * ---------- | -----
- * product		| 140
- * page 			| 142
+ * content type | count
+ * ------------ | -----
+ * product		  | 1261
+ * page 			  | 18
+ * product_cat  | 126
 
  
  */
+ 
+
+if ( PHP_SAPI !== "cli" ) { 
+	die();
+}
 
 
 oik_require( "class-sgfixup.php", "sgfixup" );
@@ -74,7 +70,7 @@ exit();
  */
 function count_fixups() {
 
-	echo "Type,ID,Title,thumbnail,#img,#h1,#h2,#style,box,badchars,services" . PHP_EOL;
+	echo "Type,ID,Title,thumbnail,#img,#h1,#h2,#style,#pstyle,#sstyle,box,badchars,services" . PHP_EOL;
 	$post_types = array( "page", "product" );
 
 	foreach ( $post_types as $type ) {
@@ -135,6 +131,11 @@ function do_post_type( $type ) {
 			$h1 = $html->find( "h1" );
 			$h2 = $html->find( "h2" );
 			$style = $html->find( "*[style]" );
+			$pstyle = $html->find( "p[style]" );
+			
+			print_r( $pstyle );
+			
+			$sstyle = $html->find( "s[style]" );
 			//$apple = $html->find( ".Apple-style-span" );
 			//$mbr = $html->find( "mbr" );
 			$bad_email = false !== strpos( $post->post_content, "ascentor.dev" );
@@ -153,6 +154,8 @@ function do_post_type( $type ) {
 		$csv[] = count( $h1 );
 		$csv[] = count( $h2 );
 		$csv[] = count( $style );
+		$csv[] = count( $pstyle );
+		$csv[] = count( $sstyle );
 		$csv[] = $box; 
 		$csv[] = $badchars;
 		$csv[] = $services;
