@@ -51,10 +51,11 @@ oik_require( "class-sgfixup.php", "sgfixup" );
 
 ini_set('memory_limit','2048M');
 
+// temporarily prevent fixups
+//apply_fixups();
+report_fixups();
 
-apply_fixups();
-
-count_fixups();
+//count_fixups();
 
 
 exit();
@@ -85,7 +86,7 @@ function count_fixups() {
  */
 function apply_fixups() {
 
-	$post_types = array( "page", "product" );
+	$post_types = array( "product" );
 
 	foreach ( $post_types as $type ) {
 	
@@ -97,6 +98,29 @@ function apply_fixups() {
 			//echo $post->post_content;
 			//echo PHP_EOL;
 			$fixup->apply_fixups( $post->ID, $post );
+		}
+	}
+}
+
+
+/**
+ * Applies the fixups needed
+ * 
+ */
+function report_fixups() {
+
+	$post_types = array( "product" );
+
+	foreach ( $post_types as $type ) {
+	
+		$fixup = new sgfixup();
+		$posts = $fixup->get_posts( $type );
+    foreach ( $posts as $post ) {
+			echo $post->ID . $post->post_title;
+			echo PHP_EOL;
+			//echo $post->post_content;
+			//echo PHP_EOL;
+			$fixup->report_fixups( $post->ID, $post );
 		}
 	}
 }
@@ -133,12 +157,12 @@ function do_post_type( $type ) {
 			$style = $html->find( "*[style]" );
 			$pstyle = $html->find( "p[style]" );
 			
-			print_r( $pstyle );
+			//print_r( $pstyle );
 			
-			$sstyle = $html->find( "s[style]" );
+			$sstyle = $html->find( "span[style]" );
 			//$apple = $html->find( ".Apple-style-span" );
 			//$mbr = $html->find( "mbr" );
-			$bad_email = false !== strpos( $post->post_content, "ascentor.dev" );
+			//$bad_email = false !== strpos( $post->post_content, "ascentor.dev" );
 			$box = strpos( $post->post_content, "[/box]" );
 			$badchars = strpos( $post->post_content, " " );
 			$services = strpos( $post->post_content, "Customer services" );

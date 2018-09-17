@@ -42,6 +42,24 @@ class sgfixup {
 	
 	}
 	
+	
+	/**
+	 * Report fixups in the content
+	 * 
+	 */
+	
+	function report_fixups( $ID, $post ) {
+		echo "Reporting fixups for $ID"; 
+		echo PHP_EOL;
+		$content = $post->post_content;
+		//$content = $this->fixup_box_shortcode( $content );
+		//$content = $this->fixup_dashes( $content );
+		//$content = $this->fixup_p_styles( $content );
+		$content = $this->report_p_styles( $content );
+		//$this->update_post( $post, $content );
+		echo PHP_EOL;
+  }
+	
 	/**
 	 * Apply fixups to the content
 	 * 
@@ -50,10 +68,12 @@ class sgfixup {
 	
 	function apply_fixups( $ID, $post ) {
 		echo "Applying fixups for $ID"; 
+		echo PHP_EOL;
 		$content = $post->post_content;
 		//$content = $this->fixup_box_shortcode( $content );
 		//$content = $this->fixup_dashes( $content );
 		//$content = $this->fixup_p_styles( $content );
+		//$content = $this->report_p_styles( $content );
 		$content = $this->fixup_span_styles( $content );
 		$this->update_post( $post, $content );
 		echo PHP_EOL;
@@ -203,22 +223,54 @@ Hex 92
 	 * 
 	 * Question: Do we still want stuff highlighted red?
 	 * 
-	 *
+	 * `
 	 * <span style="color: #ff0000">Hello World!</span>
+	 * <span style="font-family: Arial;">Hello World!</span>
+	 * `
+	 
+	 * ### | property: value      	    | Action
+	 * --- | ---------------------      | -------
+	 * 625 | color: #f00 ( red )        | Replace by <em> ?
+	 *  32 | font-size: x-large         |
+	 *  32 | font-size: xx-large        |
+	 *  10 | font-family: Arial         | 
+	 *   8 | color: #333 ( grey )       | 
+	 *   8 | text-decoration: underline | 
+	 *   2 | color: #f60 ( orange )     | 
+	 *   2 | font-size: large           |
+	 *   2 | font-size: medium          |
+	 *   1 | color: #0f0 ( green )      | 
 	 */
-	
 	function fixup_span_styles( $content ) {
 	
 		$html = str_get_html( $content );
 		
 		foreach ($html->find('span[style]') as $e) {
 			echo $e->getAttribute( "style" );
+			echo PHP_EOL;
 		}
-		
-		
-		
 		return $content;
 	}
+	
+	/**
+	 * Reports the styles being used inline in p tags
+	 *
+	 
+	 * ### | property: value      	    | Action ?
+	 * --- | ---------------------      | -------
+	 * 154 | padding-left: 30px;        | remove attr
+	 *  11 | text-align: left;          | remove attr
+	 */ 
+	function report_p_styles( $content ) {
+		$html = str_get_html( $content );
+		
+		foreach ($html->find('p[style]') as $e) {
+			echo $e->getAttribute( "style" );
+			echo PHP_EOL;
+		}
+		return $content;
+	}
+		
 	
 	
 	
