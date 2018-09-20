@@ -14,19 +14,21 @@
  *
  * Processing:
  * 
- * Number | Problem | Solutions
- * ------ | ------- | -------------
- * 53     | broken images
- * 11     | shortcodes  - [box] can be removed 
- * xxx    | Allow reviews
+ * Number | Problem                                                             | Solutions
+ * ------ | -------                                                             | -------------
+ * 53     | broken images																												|
+ * 11     | shortcodes not supported                                            | Remove  [box] shortcode
+ * xxx    | Allow reviews	                                                      |
  * 3      | Customer services wrong - en dash character problem 
  * xxx    | Character fixing - for characters pasted from Word and elsewhere
- *        | youtube links
- *        | h1's in products
- *        | h2's in products
+ *        | h1's in products                                                    | hide using CSS
+ *        | h2's in products																										| Copy to post_excerpt and hide in CSS
+ *        | Product tags:                                                       | Remove in theme
  *        | links with target="_blank" rel="noopener"
  *        | telephone number, email and address hard coded
  *        | Style in tags: p, span 
+ *        | See below for more detail...
+ *        | youtube links
  
  * 
  * - Uses simple_html_dom to parse the post_content for each post
@@ -46,19 +48,19 @@ if ( PHP_SAPI !== "cli" ) {
 	die();
 }
 
+function run_count_fixups() {
+	oik_require( "class-sgfixup.php", "sgfixup" );
+	ini_set('memory_limit','2048M');
+	// temporarily prevent fixups
+	//apply_fixups();
+	//report_fixups();
+	count_fixups();
+}
 
-oik_require( "class-sgfixup.php", "sgfixup" );
-
-ini_set('memory_limit','2048M');
-
-// temporarily prevent fixups
-//apply_fixups();
-report_fixups();
-
-//count_fixups();
+add_action( "run_sgfixup.php", "run_count_fixups" );
 
 
-exit();
+//exit();
 
 
 //echo "Pages: " . count( $posts ) . PHP_EOL;
@@ -154,6 +156,7 @@ function do_post_type( $type ) {
 			$images = $html->find( "img" );
 			$h1 = $html->find( "h1" );
 			$h2 = $html->find( "h2" );
+			
 			$style = $html->find( "*[style]" );
 			$pstyle = $html->find( "p[style]" );
 			
