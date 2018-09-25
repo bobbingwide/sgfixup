@@ -79,6 +79,19 @@ class sgfixup {
 		echo PHP_EOL;
   }
 	
+	function apply_term_fixups( $term ) {
+		echo "Applying fixups for term: " . $term->term_id . PHP_EOL;
+		$description = $this->fixup_box_shortcode( $term->description );
+		if ( $description != $term->description ) {
+			//echo $description;
+			//echo PHP_EOL;
+      wp_update_term( $term->term_id, $term->taxonomy, array( "description" => $description, "filter" => "raw" ) );
+			
+			exit();
+		}
+	
+	}
+	
 	/**
 	 * Updates the post, if the content has changed
 	 * 
@@ -102,6 +115,7 @@ class sgfixup {
 			echo $content;
 			//$content = str_replace( "[box sty
 			$content = str_replace( '[box style="rounded"]', '', $content );
+			$content = str_replace( "[box style='rounded']", '', $content );
 			$content = str_replace( '[/box]', '', $content );
 			echo $content;
 		 

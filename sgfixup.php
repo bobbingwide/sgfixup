@@ -48,13 +48,23 @@ if ( PHP_SAPI !== "cli" ) {
 	die();
 }
 
+function oh_bugger_me() {
+	print_r( ob_list_handlers() );
+	echo "Level: ";
+	echo ob_get_level(); 
+	echo PHP_EOL;
+	gob();
+}
+
 function run_count_fixups() {
 	oik_require( "class-sgfixup.php", "sgfixup" );
 	ini_set('memory_limit','2048M');
-	// temporarily prevent fixups
+	// temporarily enable / disable the logic you want
 	//apply_fixups();
 	//report_fixups();
-	count_fixups();
+	//count_fixups();
+	apply_taxonomy_fixups();
+	count_taxonomy_fixups();
 }
 
 add_action( "run_sgfixup.php", "run_count_fixups" );
@@ -78,6 +88,17 @@ function count_fixups() {
 
 	foreach ( $post_types as $type ) {
 		do_post_type( $type );
+	}
+}
+
+/**
+ * Counts the number of fixups needed for taxonomies
+ */
+function count_taxonomy_fixups() {
+	echo "Type,ID,Title,box" . PHP_EOL;
+	$taxonomies = array( "product_cat" );
+	foreach ( $taxonomies as $taxonomy ) {
+		do_taxonomy( $taxonomy );
 	}
 }
 
@@ -167,6 +188,9 @@ function do_post_type( $type ) {
 			//$mbr = $html->find( "mbr" );
 			//$bad_email = false !== strpos( $post->post_content, "ascentor.dev" );
 			$box = strpos( $post->post_content, "[/box]" );
+			if ( false === $box ) {
+				$box = strpos( $post->post_content, "[box" );
+			}
 			$badchars = strpos( $post->post_content, " " );
 			$services = strpos( $post->post_content, "Customer services" );
 			
@@ -192,7 +216,74 @@ function do_post_type( $type ) {
 		echo implode( ",", $csv );
 		echo PHP_EOL;
 	}	
-}	
+}
+
+
+/**
+ * Applies fixups to all terms in a taxonomy
+ *
+     [124] => WP_Term Object
+        (
+            [term_id] => 55
+            [name] => Suzuki Wing Mirrors
+            [slug] => suzuki-wing-mirrors
+            [term_group] => 0
+            [term_taxonomy_id] => 55
+            [taxonomy] => product_cat
+            [description] => [box style="rounded"]
+<h2>Suzuki wing mirrors by Bikeit.</h2>
+Theses quality direct replacement Bikeit Suzuki wing mirrors are great value for money.
+
+Easy to install, no modification needed.
+
+[/box]
+ * 
+ * @param string $taxonomy the taxonomy name
+ */
+function do_taxonomy( $taxonomy ) {
+	//$fixup = new sgfixup();
+	$terms = get_terms( $taxonomy );
+	//print_r( $terms );
+	//gob();
+	foreach ( $terms as $term ) {
+		//$html = $fixup->get_post_html( $post->ID, $post);
+		$box = strpos( $term->description, "[/box]" );
+    if ( false === $box ) {
+			$box = strpos( $term->description, "[box" );
+		}
+		$csv = array();
+		$csv[] = $term->taxonomy;
+		$csv[] = $term->term_id;
+		$csv[] = '"' . $term->name . '"';
+		$csv[] = $box; 
+		//$csv[] = count( $apple );
+		//$csv[] = count( $mbr );
+		//$csv[] = $bad_email;
+		echo implode( ",", $csv );
+		echo PHP_EOL;
+	}	
+}
+
+	
+/**
+ * Applies the fixups needed
+ * 
+ */
+function apply_taxonomy_fixups() {
+
+	remove_filter( "pre_term_description", "wp_filter_kses", 10 );
+
+	$fixup = new sgfixup();
+	$taxonomies = array( "product_cat" );
+
+	foreach ( $taxonomies as $taxonomy ) {
+	
+		$terms = get_terms( $taxonomy );
+    foreach ( $terms as $term ) {
+			$fixup->apply_term_fixups( $term );
+		}
+	}
+}
 
 function convert_html_to_text() {
 
