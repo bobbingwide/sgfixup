@@ -281,6 +281,7 @@ function apply_taxonomy_fixups() {
 		$terms = get_terms( $taxonomy );
     foreach ( $terms as $term ) {
 			$fixup->apply_term_fixups( $term );
+			
 		}
 	}
 }

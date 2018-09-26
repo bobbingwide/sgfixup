@@ -87,7 +87,7 @@ class sgfixup {
 			//echo PHP_EOL;
       wp_update_term( $term->term_id, $term->taxonomy, array( "description" => $description, "filter" => "raw" ) );
 			
-			exit();
+			// exit();
 		}
 	
 	}
@@ -116,8 +116,14 @@ class sgfixup {
 			//$content = str_replace( "[box sty
 			$content = str_replace( '[box style="rounded"]', '', $content );
 			$content = str_replace( "[box style='rounded']", '', $content );
+			$content = str_replace( "[box style='rounded]", '', $content );
+			$content = str_replace( '[box style="rounded]', '', $content );
+			
 			$content = str_replace( '[/box]', '', $content );
+			$content = trim( $content );
+			echo PHP_EOL;
 			echo $content;
+			echo PHP_EOL;
 		 
 		}	else { 
 			echo " No box";
