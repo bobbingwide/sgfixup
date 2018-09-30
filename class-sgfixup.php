@@ -52,11 +52,13 @@ class sgfixup {
 		echo "Reporting fixups for $ID"; 
 		echo PHP_EOL;
 		$content = $post->post_content;
+		$excerpt = $post->post_excerpt;
 		//$content = $this->fixup_box_shortcode( $content );
 		//$content = $this->fixup_dashes( $content );
 		//$content = $this->fixup_p_styles( $content );
-		$content = $this->report_p_styles( $content );
-		//$this->update_post( $post, $content );
+		//$content = $this->report_p_styles( $content );
+		$this->report_missing_image( $ID, $post );
+		//$this->update_post( $post, $content, $excerpt );
 		echo PHP_EOL;
   }
 	
@@ -74,8 +76,18 @@ class sgfixup {
 		//$content = $this->fixup_dashes( $content );
 		//$content = $this->fixup_p_styles( $content );
 		//$content = $this->report_p_styles( $content );
-		$content = $this->fixup_span_styles( $content );
-		$this->update_post( $post, $content );
+		//$content = $this->fixup_span_styles( $content );
+		$excerpt = $post->post_excerpt;
+		if ( empty( $excerpt ) ) {
+			$excerpt = $this->extract_h2( $content );
+			//$content = $this->remove_h2( $content );
+		} else {
+			echo "Already set: " ;
+			echo $excerpt;
+			echo PHP_EOL;
+		}
+				
+		$this->update_post( $post, $content, $excerpt );
 		echo PHP_EOL;
   }
 	
@@ -93,17 +105,19 @@ class sgfixup {
 	}
 	
 	/**
-	 * Updates the post, if the content has changed
+	 * Updates the post, if the content or excerpt has changed
 	 * 
 	 * @param object $post The post object
 	 * @param string $content the updated post_content
+	 * @param string $excerpt the updated post_excerpt
    */
-	function update_post( $post, $content ) {
-		if ( $content != $post->post_content ) {
+	function update_post( $post, $content, $excerpt ) {
+		if ( ( $content != $post->post_content ) || ( $excerpt != $post->post_excerpt ) ) {
 			$post->post_content = $content;
+			$post->post_excerpt = $excerpt;
 			wp_update_post( $post );
 			echo "Updated {$post->ID}" ;
-		}
+		} 
 	}
 	
 	/**
@@ -263,7 +277,6 @@ Hex 92
 	 */
 	function fixup_span_styles( $content ) {
 	
-		$html = str_get_html( $content );
 		
 		foreach ($html->find('span[style]') as $e) {
 			echo $e->getAttribute( "style" );
@@ -271,6 +284,25 @@ Hex 92
 		}
 		return $content;
 	}
+	
+	/**
+	 * Extracts the contents of all h2's
+	 * 
+	 * @param string $content
+	 * @return string concatentated innertext for all h2's
+	 */
+	function extract_h2( $content ) {
+		$html = str_get_html( $content );
+		$post_excerpt = null;
+		foreach ( $html->find( 'h2' ) as $e ) {
+			$post_excerpt .= $e->innertext;
+			echo $post_excerpt;
+			echo PHP_EOL;
+		}
+		
+		return $post_excerpt;
+	}
+		
 	
 	/**
 	 * Reports the styles being used inline in p tags
@@ -290,6 +322,44 @@ Hex 92
 		}
 		return $content;
 	}
+	
+	
+	/** 
+	 * Reports and missing images
+	 * 
+	 * Regenerate thumbnails reports missing images but only tells you the title and the 
+	 * ID and not the file it couldn't find.
+	 * We'll try to be a bit more helpful.
+	 * get_post_thumbnail_id is a wrapper to get post meta _thumbnail_id
+	 */ 
+	function report_missing_image( $ID, $post ) {
+		echo $ID .  $post->title . PHP_EOL;
+		$attachment_id = get_post_thumbnail_id( $post );
+		if ( $attachment_id ) {
+			echo $attachment_id;
+			echo PHP_EOL; 
+			$attachment = get_post( $attachment_id );
+			//print_r( $attachment );
+			$file = get_attached_file( $attachment_id, true );
+			echo $file;
+			echo PHP_EOL;
+			
+			$exists = file_exists( $file );
+			if ( !$exists ) {
+			gob();
+			
+			}	else {
+				$size = filesize( $file );
+				echo $size; 
+			}
+			
+		}
+	}
+		
+		
+	
+	
+	
 		
 	
 	
