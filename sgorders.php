@@ -136,7 +136,7 @@ function sgfixup_list_orders( $contents ) {
 	}
 	
 	//ksort( $items );
-	print_r( $items );
+	//print_r( $items );
 	return $items;
 
 
@@ -158,7 +158,7 @@ function sgfixup_find_order( $orders, $order_no ) {
 	$order_found = isset( $orders[ $order_no ] );
 	if ( $order_found ) {
 		echo $order_no;
-		print_r( $orders[ $order_no ] );
+		//print_r( $orders[ $order_no ] );
 	} else {
 		return $order_found;
 	}
@@ -220,7 +220,7 @@ function sgfixup_get_prefix( $contents ) {
 		}
 	} 
 	$prefix = implode( "", $prefix );
-	echo $prefix;
+	//echo $prefix;
 	return $prefix;
 
 }
