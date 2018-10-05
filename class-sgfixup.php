@@ -57,8 +57,9 @@ class sgfixup {
 		//$content = $this->fixup_dashes( $content );
 		//$content = $this->fixup_p_styles( $content );
 		//$content = $this->report_p_styles( $content );
-		$this->report_missing_image( $ID, $post );
+		//$this->report_missing_image( $ID, $post );
 		//$this->update_post( $post, $content, $excerpt );
+		$this->report_p_see_below( $ID, $post );
 		echo PHP_EOL;
   }
 	
@@ -354,6 +355,53 @@ Hex 92
 			}
 			
 		}
+	}
+	
+	
+	/**
+	 * Here we're trying to find the "See below" that comes after the h2
+	 * The "text" node contains the innertext of each tag.
+	 * How do we identify a parentless one?
+	 */
+	
+	
+	function report_p_see_below( $ID, $post ) {
+		echo $ID .  $post->title . PHP_EOL;
+		$lines = explode( "\r\n", $post->post_content );
+		$olines = array();
+		$found = false;
+		foreach ( $lines as $line ) {
+      $sb = stripos( $line, "See below " );
+			if ( false === $sb ) {
+				$olines[] = $line;
+			}	else {
+				$found = true;
+			}
+		}
+		
+		if ( $found ) {
+			$post->post_content = implode( "\r\n", $olines );
+		} else {
+      echo $post->post_content;
+		}
+		
+		//	gob();
+	}
+		
+	function find_text( $ID, $post ) {
+		
+		echo $post->post_content;
+		echo PHP_EOL;
+		$html = str_get_html( $post->post_content );
+		//print_r( $html );
+		//gob();
+		foreach ( $html->find( 'text' ) as $e ) {
+			echo $e->innertext;
+			echo PHP_EOL;
+			continue;
+		}
+			gob();
+	
 	}
 		
 		

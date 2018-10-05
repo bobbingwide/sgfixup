@@ -60,8 +60,8 @@ function run_count_fixups() {
 	oik_require( "class-sgfixup.php", "sgfixup" );
 	ini_set('memory_limit','2048M');
 	// temporarily enable / disable the logic you want
-	apply_fixups();
-	//report_fixups();
+	//apply_fixups();
+	report_fixups();
 	//count_fixups();
 	//apply_taxonomy_fixups();
 	//count_taxonomy_fixups();
