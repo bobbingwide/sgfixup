@@ -57,9 +57,9 @@ class sgfixup {
 		//$content = $this->fixup_dashes( $content );
 		//$content = $this->fixup_p_styles( $content );
 		//$content = $this->report_p_styles( $content );
-		//$this->report_missing_image( $ID, $post );
+		$this->report_missing_image( $ID, $post );
 		//$this->update_post( $post, $content, $excerpt );
-		$this->report_p_see_below( $ID, $post );
+		//$this->report_p_see_below( $ID, $post );
 		echo PHP_EOL;
   }
 	
@@ -347,7 +347,8 @@ Hex 92
 			
 			$exists = file_exists( $file );
 			if ( !$exists ) {
-			gob();
+				echo "File does not exist" . PHP_EOL;
+				gob();
 			
 			}	else {
 				$size = filesize( $file );

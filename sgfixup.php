@@ -61,10 +61,10 @@ function run_count_fixups() {
 	ini_set('memory_limit','2048M');
 	// temporarily enable / disable the logic you want
 	//apply_fixups();
-	report_fixups();
+	//report_fixups();
 	//count_fixups();
 	//apply_taxonomy_fixups();
-	//count_taxonomy_fixups();
+	count_taxonomy_fixups();
 	
 	// count_missing_images();
 }
@@ -97,7 +97,7 @@ function count_fixups() {
  * Counts the number of fixups needed for taxonomies
  */
 function count_taxonomy_fixups() {
-	echo "Type,ID,Title,box" . PHP_EOL;
+	echo "Type,ID,Title,box,image" . PHP_EOL;
 	$taxonomies = array( "product_cat" );
 	foreach ( $taxonomies as $taxonomy ) {
 		do_taxonomy( $taxonomy );
@@ -258,6 +258,7 @@ function do_taxonomy( $taxonomy ) {
 		$csv[] = $term->term_id;
 		$csv[] = '"' . $term->name . '"';
 		$csv[] = $box; 
+		$csv[] = get_term_image( $term );
 		//$csv[] = count( $apple );
 		//$csv[] = count( $mbr );
 		//$csv[] = $bad_email;
@@ -292,6 +293,40 @@ function convert_html_to_text() {
 
 	$str = $html->save();
 	echo $str;
+}
+
+
+function get_term_image( $term ) {
+	$term_image = array();
+	$thumbnail_id = get_term_meta( $term->term_id, "thumbnail_id", true );
+	//echo $thumbnail_id . PHP_EOL;
+	
+	$term_image[] = $thumbnail_id;
+	if ( $thumbnail_id ) {
+		$thumbnail = get_attached_file( $thumbnail_id, true );
+		//echo $thumbnail . PHP_EOL;
+		$term_image[] = $thumbnail;
+		$term_image[] = check_file_exists( $thumbnail );
+	}
+	
+	//gob();
+	return implode( ",", $term_image );
+}
+
+function check_file_exists( $file ) {
+	$size = null;
+	//echo PHP_EOL;
+			
+	$exists = file_exists( $file );
+	if ( !$exists ) {
+		echo "File does not exist" . PHP_EOL;
+		//gob();
+	
+	}	else {
+		$size = filesize( $file );
+		echo $size; 
+	}
+	return $size;
 }
 
 
