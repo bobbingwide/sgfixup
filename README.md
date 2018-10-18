@@ -4,7 +4,7 @@
 * Tags: content, correction
 * Requires at least: 4.9
 * Tested up to: 4.9.8
-* Stable tag: 0..0.1
+* Stable tag: 0.0.2
 * License: GPLv3
 * License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -25,6 +25,9 @@ See also https://github.com/bobbingwide/sg-motorsport.
 1. sgfixup in action
 
 ## Upgrade Notice 
+# 0.0.2 
+Now includes SG-mu.php - for safe keeping
+
 # 0.0.1 
 Edit as required to get the output needed.
 
@@ -32,6 +35,10 @@ Edit as required to get the output needed.
 New plugin. Only available from github
 
 ## Changelog 
+# 0.0.2 
+* Added: Save first version of the SG-mu.php MU plugin used during local CLI development
+* Added: Add logic to check existence of product_cat thumbnail images
+
 # 0.0.1 
 * Added: Search for p[style] and span[style] tags.
 * Added: Start fixing up products and pages; remove [box] shortcodes
